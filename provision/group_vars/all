@@ -1,0 +1,9 @@
+GIT_BRANCH: v0.3.6
+
+PROJECT_NAME: elcidrfh
+PROJECT_PATH: /usr/lib/ohc
+
+LOG_DIR: /usr/lib/ohc/logs
+CONFIG_DIR: /usr/lib/ohc/var
+UNIX_USER: ohc
+UNIX_PASSWORD: super1

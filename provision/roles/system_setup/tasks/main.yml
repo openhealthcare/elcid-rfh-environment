@@ -1,0 +1,114 @@
+- name: generate locale
+  become: true
+  command: /usr/sbin/locale-gen en_GB.UTF-8
+
+- name: Set locale
+  become: true
+  command: /usr/sbin/update-locale LANG=en_GB.UTF-8
+
+- name: install packages for sysadmin
+  become: true
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - emacs
+    - vim
+    - python-dev
+    - git
+
+- name: Add the unix user user
+  user: name={{ UNIX_USER }}
+        state=present
+        createhome=yes
+        append=True
+        group=sudo
+  become: true
+
+- name: Set password to user
+  shell: echo '{{ UNIX_USER }}:{{ UNIX_PASSWORD }}' | sudo chpasswd
+  become: True
+  no_log: True
+
+- name: Create the base directories
+  become: True
+  file:
+    path: "{{ PROJECT_PATH }}"
+    # when specifying mode using octal numbers, add a leading 0
+    mode: 0777
+    state: directory
+    owner: ohc
+  loop:
+    - "{{ PROJECT_PATH }}"
+    - "{{ CONFIG_DIR }}"
+    - "{{ CONFIG_DIR }}/run" # where supervisord stores its pid
+    - "{{ LOG_DIR }}"
+    - "{{ LOG_DIR }}/supervisord"
+
+- name: Create the log files
+  become: True
+  file:
+    path: "{{ LOG_DIR }}/{{ item }}"
+    owner: "{{ UNIX_USER }}"
+    state: touch
+  loop:
+    - "supervisord/supervisord.log"
+    - gunicorn.log
+
+- name: Copy private settings
+  become: True
+  copy:
+    src: files/private_settings.json
+    dest: "{{ PROJECT_PATH }}"
+    owner: "{{ UNIX_USER }}"
+    mode: 0744
+
+- name: Setup the Git repo
+  git: repo=https://github.com/openhealthcare/elcid-rfh.git
+       version={{ GIT_BRANCH }}
+       dest="{{ PROJECT_PATH }}/elcidrfh-deployment"
+       accept_hostkey=yes
+       force=yes
+
+- name: Synch repo keys
+  become: True
+  command: apt-key add Repo.keys
+  args:
+    chdir: /usr/lib/server_restore/backup_server/
+
+- name: Synch repo keys
+  become: True
+  shell: cp -R sources.list* /etc/apt/
+  args:
+    chdir: /usr/lib/server_restore/backup_server/
+
+# # Make sure Grub doesn't freeze us out
+# # https://serverfault.com/questions/243343/headless-ubuntu-server-machine-sometimes-stuck-at-grub-menu
+# - name: "Add grub record timeout to the grub defaults"
+#   become: True
+#   lineinfile:
+#     path: /etc/default/grub
+#     line: 'GRUB_RECORDFAIL_TIMEOUT=2'
+
+# - name: "Update Grub"
+#   command: update-grub
+#   become: True
+
+- name: Install deselect
+  become: True
+  apt:
+    name: "dselect"
+    state: present
+
+- name: Update dselect
+  become: True
+  command: dselect update
+  args:
+    chdir: /usr/lib/server_restore/backup_server/
+
+- name: Update package list
+  become: True
+  shell: dpkg --set-selections < Package.list
+  args:
+    chdir: /usr/lib/server_restore/backup_server/

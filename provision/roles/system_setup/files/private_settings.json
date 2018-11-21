@@ -1,0 +1,25 @@
+{
+    "db_password": "blahblah",
+    "remote_password": "blahblah",
+    "additional_settings": {
+        "ADMINS": "(('fred', 'fred.kingham@openhealthcare.org.uk',),)",
+        "ASYNC_API": "True",
+        "EXTRACT_ASYNC": "True",
+        "EMAIL_PORT": 25,
+        "OPAL_ANALYTICS_ID": "'blahblah'",
+        "OPAL_BRAND_NAME": "'elCID Royal Free Test'",
+        "EMAIL_HOST": "''",
+        "API_USER": "'ohc'",
+        "API_STATE": "'dev'",
+        "INTRAHOSPITAL_API": "'intrahospital_api.apis.dev_api.DevApi'",
+        "HOSPITAL_DB": {
+            "IP_ADDRESS": "blah",
+            "DATABASE": "blah",
+            "USERNAME": "blah",
+            "PASSWORD": "blah",
+            "view": "blah"
+        }
+    },
+    "proxy": "''",
+    "host_string": ""
+}

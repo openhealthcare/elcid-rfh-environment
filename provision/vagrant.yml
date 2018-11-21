@@ -1,0 +1,9 @@
+- hosts: all
+  gather_facts: false
+  roles:
+      - system_setup
+  pre_tasks:
+      - name: Install python for Ansible
+        raw: test -e /usr/bin/python || (apt -y update && apt install -y python)
+        changed_when: False
+        become: True
