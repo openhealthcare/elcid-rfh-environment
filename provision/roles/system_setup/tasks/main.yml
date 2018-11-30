@@ -34,11 +34,11 @@
 - name: Create the base directories
   become: True
   file:
-    path: "{{ PROJECT_PATH }}"
+    path: "{{ item }}"
     # when specifying mode using octal numbers, add a leading 0
     mode: 0777
     state: directory
-    owner: ohc
+    owner: "{{ UNIX_USER }}"
   loop:
     - "{{ PROJECT_PATH }}"
     - "{{ CONFIG_DIR }}"
